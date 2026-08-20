@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 48, // Touch target size for accessibility
+    minHeight: 48, // Tamaño del área táctil para accesibilidad
     width: '100%',
   },
   disabled: {

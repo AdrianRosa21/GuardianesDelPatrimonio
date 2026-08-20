@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   inputWithIcon: {
-    paddingRight: 80, // Space for the toggle button
+    paddingRight: 80, // Espacio para el botón de mostrar/ocultar
   },
   iconContainer: {
     position: 'absolute',

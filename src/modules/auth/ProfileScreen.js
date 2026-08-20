@@ -12,7 +12,7 @@ const ProfileScreen = () => {
     await logout();
   };
 
-  // Get initials for avatar
+  // Obtener iniciales para el avatar
   const getInitials = (name) => {
     if (!name) return 'U';
     const names = name.split(' ');

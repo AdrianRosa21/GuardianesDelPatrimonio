@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Restore session when the app starts
+  // Restaurar sesión cuando la app inicia
   const restoreSession = async () => {
     try {
       setIsLoading(true);
@@ -32,10 +32,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // In a real app, you would validate with a backend here.
-      // For this prototype, we simulate a successful login with a mock user.
+      // En una app real, aquí validarías con un backend.
+      // Para este prototipo, simulamos un inicio de sesión exitoso.
       const mockUser = {
-        name: 'Usuario Guardián', // Fallback name
+        name: 'Usuario Guardián', // Nombre por defecto
         email: email,
       };
       
@@ -50,8 +50,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      // In a real app, you would send this to a backend.
-      // NEVER store passwords in AsyncStorage.
+      // En una app real, enviarías esto a un backend.
+      // NUNCA guardes contraseñas reales en AsyncStorage.
       const newUser = {
         name,
         email,

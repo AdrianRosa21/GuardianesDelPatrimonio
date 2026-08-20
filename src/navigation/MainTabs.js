@@ -11,7 +11,7 @@ import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator();
 
-// Simple icon component using emojis for the prototype
+// Componente simple de iconos usando emojis para el prototipo
 const TabIcon = ({ name, focused }) => {
   let icon = '';
   switch (name) {
@@ -52,7 +52,7 @@ const MainTabs = () => {
           shadowRadius: 4,
           paddingBottom: 5,
           paddingTop: 5,
-          minHeight: 60, // Better touch target
+          minHeight: 60, // Mejor área táctil para accesibilidad
         },
         headerShown: false,
       })}
