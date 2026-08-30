@@ -15,9 +15,11 @@ import PrimaryButton from '../../components/common/PrimaryButton';
 import { validateEmail, validatePassword } from '../../utils/validators';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+import { supabase } from '../../lib/supabase';
+import { Alert } from 'react-native';
 
 const LoginScreen = ({ navigation }) => {
-  const { login } = useContext(AuthContext);
+  // Ya no usamos login del contexto, sino Supabase directamente
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,16 +32,36 @@ const LoginScreen = ({ navigation }) => {
 
     setErrors({ email: emailError, password: passwordError });
 
+    if (!email || !password) {
+      Alert.alert('Error', 'Por favor ingresa tu correo y contraseña');
+      return;
+    }
+
     if (emailError || passwordError) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await login(email.trim(), password);
-      // Navigation to main app is handled by AppNavigator listening to AuthContext
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (error) {
+        if (error.message === 'Email not confirmed') {
+          navigation.navigate('ConfirmEmail', { email: email.trim() });
+        } else {
+          Alert.alert('Error de autenticación', error.message);
+        }
+      } else if (data.user) {
+        // La sesión ha sido iniciada. 
+        // AppNavigator escuchará onAuthStateChange y cambiará la pantalla automáticamente,
+        // o si prefieres forzar navegación:
+        // navigation.replace('Main');
+      }
     } catch (error) {
-      setErrors({ ...errors, general: error.message || 'Error al iniciar sesión' });
+      Alert.alert('Error', error.message || 'Error al iniciar sesión');
     } finally {
       setIsSubmitting(false);
     }

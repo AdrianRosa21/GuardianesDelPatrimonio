@@ -8,6 +8,7 @@ import { AuthContext } from '../context/AuthContext';
 import SplashScreen from '../modules/auth/SplashScreen';
 import LoginScreen from '../modules/auth/LoginScreen';
 import RegisterScreen from '../modules/auth/RegisterScreen';
+import ConfirmEmailScreen from '../modules/auth/ConfirmEmailScreen';
 
 // Main App
 import MainTabs from './MainTabs';
@@ -37,6 +38,15 @@ const AppNavigator = () => {
               options={{ 
                 headerShown: true, 
                 title: 'Crear cuenta',
+                headerBackTitle: 'Volver'
+              }} 
+            />
+            <Stack.Screen 
+              name="ConfirmEmail" 
+              component={ConfirmEmailScreen} 
+              options={{ 
+                headerShown: true, 
+                title: 'Confirmar correo',
                 headerBackTitle: 'Volver'
               }} 
             />

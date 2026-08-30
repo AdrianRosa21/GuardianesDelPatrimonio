@@ -15,9 +15,11 @@ import PrimaryButton from '../../components/common/PrimaryButton';
 import { validateName, validateEmail, validatePassword } from '../../utils/validators';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+import { supabase } from '../../lib/supabase';
+import { Alert } from 'react-native';
 
 const RegisterScreen = ({ navigation }) => {
-  const { register } = useContext(AuthContext);
+  // Ya no usamos register del contexto, sino Supabase directamente
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,16 +53,36 @@ const RegisterScreen = ({ navigation }) => {
       confirmPassword: confirmError
     });
 
+    if (!email || !password || !name) {
+      Alert.alert('Error', 'Por favor completa todos los campos');
+      return;
+    }
+
     if (nameError || emailError || passwordError || confirmError) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await register(name.trim(), email.trim(), password);
-      // Navigation is handled automatically by AppNavigator listening to AuthContext
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+        options: {
+          data: {
+            nombre_completo: name.trim(),
+            nombre_usuario: name.trim().split(' ')[0], // Usamos el primer nombre como fallback
+          },
+        },
+      });
+
+      if (error) {
+        Alert.alert('Error de registro', error.message);
+      } else {
+        // Registro exitoso, redirigimos a confirmar correo
+        navigation.navigate('ConfirmEmail', { email: email.trim() });
+      }
     } catch (error) {
-      setErrors({ ...errors, general: error.message || 'Error al registrar usuario' });
+      Alert.alert('Error', error.message || 'Error al registrar usuario');
     } finally {
       setIsSubmitting(false);
     }
