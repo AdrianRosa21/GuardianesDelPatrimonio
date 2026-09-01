@@ -1,82 +1,197 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+
 import { colors } from '../../src/theme/colors';
 import { spacing } from '../../src/theme/spacing';
 
-const CultureHomeScreen = () => {
+type MenuCardProps = {
+  icon: string;
+  title: string;
+  description: string;
+  onPress: () => void;
+};
+
+function MenuCard({
+  icon,
+  title,
+  description,
+  onPress,
+}: MenuCardProps) {
+  return (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+    >
+      <View style={styles.iconContainer}>
+        <Text style={styles.icon}>{icon}</Text>
+      </View>
+
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{title}</Text>
+        <Text style={styles.cardDescription}>{description}</Text>
+      </View>
+
+      <Text style={styles.arrow}>›</Text>
+    </TouchableOpacity>
+  );
+}
+
+export default function ExplorarScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Text style={styles.icon}>🏺</Text>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerIcon}>🏺</Text>
+
+          <Text style={styles.title}>
+            Exploración cultural
+          </Text>
+
+          <Text style={styles.subtitle}>
+            Descubre países, tradiciones, gastronomía, historia y patrimonio
+            cultural.
+          </Text>
         </View>
-        <Text style={styles.title} accessibilityRole="header">
-          Exploración cultural
-        </Text>
-        <Text style={styles.description}>
-          Este módulo permitirá explorar países, categorías y patrimonio cultural.
-        </Text>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>Módulo de Persona 2</Text>
-        </View>
-      </View>
+
+        <MenuCard
+          icon="🌎"
+          title="Explorar países"
+          description="Conoce el patrimonio cultural de diferentes países."
+          onPress={() => router.push('/cultura/paises')}
+        />
+
+        <MenuCard
+          icon="🗂️"
+          title="Categorías culturales"
+          description="Explora gastronomía, historia, tradiciones y más."
+          onPress={() => router.push('/cultura/categorias')}
+        />
+
+        <MenuCard
+          icon="❤️"
+          title="Mis favoritos"
+          description="Consulta el patrimonio cultural que has guardado."
+          onPress={() => router.push('/cultura/favoritos')}
+        />
+
+        <MenuCard
+          icon="🏆"
+          title="Ranking"
+          description="Mira quiénes son los Guardianes con más puntos."
+          onPress={() => router.push('/cultura/ranking')}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
+
   content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
+    padding: spacing.l,
+    paddingBottom: spacing.xxl,
   },
-  iconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.l,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  icon: {
-    fontSize: 48,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: spacing.m,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 16,
-    color: colors.text,
-    textAlign: 'center',
-    lineHeight: 24,
+
+  header: {
+    marginTop: spacing.l,
     marginBottom: spacing.xl,
   },
-  badge: {
-    backgroundColor: colors.secondary,
-    paddingVertical: spacing.s,
-    paddingHorizontal: spacing.m,
-    borderRadius: 20,
+
+  headerIcon: {
+    fontSize: 54,
+    marginBottom: spacing.s,
   },
-  badgeText: {
-    color: colors.white,
+
+  title: {
+    fontSize: 30,
     fontWeight: 'bold',
-    fontSize: 14,
+    color: colors.primary,
+    marginBottom: spacing.s,
+  },
+
+  subtitle: {
+    fontSize: 16,
+    color: colors.textLight,
+    lineHeight: 23,
+  },
+
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    backgroundColor: colors.surface,
+
+    padding: spacing.m,
+    borderRadius: 16,
+    marginBottom: spacing.m,
+
+    elevation: 3,
+
+    shadowColor: colors.black,
+    shadowOpacity: 0.06,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowRadius: 6,
+  },
+
+  iconContainer: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+
+    backgroundColor: colors.background,
+
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    marginRight: spacing.m,
+  },
+
+  icon: {
+    fontSize: 29,
+  },
+
+  cardContent: {
+    flex: 1,
+  },
+
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+
+  cardDescription: {
+    color: colors.textLight,
+    lineHeight: 19,
+  },
+
+  arrow: {
+    fontSize: 31,
+    color: colors.primary,
+    marginLeft: spacing.s,
   },
 });
-
-export default CultureHomeScreen;
