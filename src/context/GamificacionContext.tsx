@@ -79,8 +79,8 @@ export const GamificacionProvider = ({ children }: { children: React.ReactNode }
   };
 
   // Sincroniza puntos y nivel con Supabase (para el ranking).
-  // La fila del usuario ya existe en 'perfiles', así que se ACTUALIZA.
-  // Si algo falla, se registra en consola pero NO afecta la experiencia local.
+
+
   const sincronizarConSupabase = async (nuevosPuntos: number) => {
     if (!SINCRONIZAR_CON_SUPABASE) return;
     try {
