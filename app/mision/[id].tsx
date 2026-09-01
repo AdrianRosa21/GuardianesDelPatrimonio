@@ -27,18 +27,22 @@ const TriviaScreen = () => {
 
   useEffect(() => {
     if (!mision) return;
+
     const obtenerDato = async () => {
       try {
         setCargandoDato(true);
+        // El código ISO del país es el prefijo del id de la misión (p.ej. 'sv-1' -> 'SV').
+        const codigoPais = mision.id.split('-')[0].toUpperCase();
+        // API externa: countries.dev (gratuita, sin API key).
         const respuesta = await fetch(
-          `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(mision.pais)}`
+          `https://countries.dev/alpha/${codigoPais}`
         );
-        const datos = await respuesta.json();
-        
-        if (datos.extract) {
-          // Tomar solo la primera o las dos primeras oraciones para que no sea muy largo
-          const resumenCorto = datos.extract.split('. ').slice(0, 2).join('. ') + '.';
-          setDatoCultural(resumenCorto);
+        const pais = await respuesta.json();
+        if (pais && pais.name) {
+          const capital = pais.capital || 'desconocida';
+          const region = pais.region || 'América';
+          const moneda = pais.currencies?.[0]?.name || 'moneda local';
+          setDatoCultural(`Capital: ${capital} · Región: ${region} · Moneda: ${moneda}.`);
         } else {
           setDatoCultural('No se pudo obtener información adicional del país.');
         }
@@ -48,6 +52,7 @@ const TriviaScreen = () => {
         setCargandoDato(false);
       }
     };
+
     obtenerDato();
   }, [mision]);
 
