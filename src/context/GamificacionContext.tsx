@@ -5,17 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { misiones, niveles, insignias, Nivel, Insignia } from '../data/misiones';
 
 const STORAGE_KEY = '@guardianes_progreso';
-
-// La tabla del ranking es 'perfiles' y su llave de usuario es la columna 'id'
-// (coincide con auth.uid). Cada usuario ya tiene su fila al registrarse, por eso
-// se ACTUALIZA (update) en lugar de crear. Los puntos se reemplazan por el total
-// exacto que lleva este módulo.
 const SINCRONIZAR_CON_SUPABASE = true;
-
-const TABLA_PUNTOS = 'perfiles';
-const COLUMNA_ID_USUARIO = 'id';
-const COLUMNA_PUNTOS = 'puntos';
-const COLUMNA_NIVEL = 'nivel';
 
 interface Progreso {
   puntos: number;
@@ -37,9 +27,6 @@ interface GamificacionContextType {
 
 const GamificacionContext = createContext<GamificacionContextType | undefined>(undefined);
 
-// Calcula el nivel según la misma fórmula que usa la base de datos del ranking:
-// nivel = 1 + floor(puntos / 300), limitado al nivel máximo definido en 'niveles'.
-// Así el nivel que muestra la app siempre coincide con el del ranking.
 const calcularNivel = (puntos: number): Nivel => {
   const nivelMaximo = niveles[niveles.length - 1];
   const numeroNivel = Math.min(1 + Math.floor(puntos / 300), nivelMaximo.nivel);
@@ -78,30 +65,56 @@ export const GamificacionProvider = ({ children }: { children: React.ReactNode }
     }
   };
 
-  // Sincroniza puntos y nivel con Supabase (para el ranking).
-
-
-  const sincronizarConSupabase = async (nuevosPuntos: number) => {
+  const registrarEnSupabase = async (misionId: string, nuevosPuntos: number) => {
     if (!SINCRONIZAR_CON_SUPABASE) return;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // 1. Actualizar los puntos totales y nivel en el perfil del usuario (Ranking)
       const nivel = calcularNivel(nuevosPuntos).nivel;
+      const { error: errorPerfil } = await supabase
+        .from('perfiles')
+        .update({ puntos: nuevosPuntos, nivel: nivel })
+        .eq('id', user.id);
 
-      const { error } = await supabase
-        .from(TABLA_PUNTOS)
-        .update({
-          [COLUMNA_PUNTOS]: nuevosPuntos,
-          [COLUMNA_NIVEL]: nivel,
-        })
-        .eq(COLUMNA_ID_USUARIO, user.id);
+      if (errorPerfil) {
+        console.error('Error al actualizar puntos en perfil:', errorPerfil.message);
+      }
 
-      if (error) {
-        console.error('No se pudo sincronizar con el ranking:', error.message);
+      // 2. Registrar la misión específica en progreso_mision
+      const mision = misiones.find((m) => m.id === misionId);
+      if (!mision) return;
+
+      const { data: misionDB, error: errorBusqueda } = await supabase
+        .from('misiones')
+        .select('id_mision')
+        .eq('titulo', mision.titulo)
+        .maybeSingle();
+
+      if (errorBusqueda || !misionDB) {
+        console.warn('La misión no está en la base todavía:', mision.titulo);
+        return;
+      }
+
+      const { error: errorProgreso } = await supabase
+        .from('progreso_mision')
+        .upsert(
+          {
+            id_usuario: user.id,
+            id_mision: misionDB.id_mision,
+            estado: 'completada',
+            puntos_obtenidos: mision.puntos,
+            fecha_completado: new Date().toISOString(),
+          },
+          { onConflict: 'id_usuario,id_mision' }
+        );
+
+      if (errorProgreso) {
+        console.error('No se pudo registrar el progreso de la misión:', errorProgreso.message);
       }
     } catch (error) {
-      console.error('Error de sincronización con Supabase:', error);
+      console.error('Error al sincronizar con Supabase:', error);
     }
   };
 
@@ -112,7 +125,9 @@ export const GamificacionProvider = ({ children }: { children: React.ReactNode }
     setMisionesCompletadas(nuevasMisiones);
     setPuntos(nuevosPuntos);
     guardarProgreso(nuevosPuntos, nuevasMisiones);
-    sincronizarConSupabase(nuevosPuntos);
+    
+    // Llamar a registrarEnSupabase con los nuevos puntos para que actualice ambas tablas
+    registrarEnSupabase(misionId, nuevosPuntos);
   };
 
   const estaCompletada = (misionId: string) => misionesCompletadas.includes(misionId);
@@ -121,7 +136,11 @@ export const GamificacionProvider = ({ children }: { children: React.ReactNode }
     setPuntos(0);
     setMisionesCompletadas([]);
     guardarProgreso(0, []);
-    sincronizarConSupabase(0);
+    
+    // Opcional: Reiniciar puntos en supabase
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) supabase.from('perfiles').update({ puntos: 0, nivel: 1 }).eq('id', user.id);
+    });
   };
 
   const nivelActual = calcularNivel(puntos);
