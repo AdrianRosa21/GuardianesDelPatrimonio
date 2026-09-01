@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { colors } from '../src/theme/colors';
+import { GamificacionProvider } from '../src/context/GamificacionContext';
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
@@ -12,13 +13,11 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setInitialized(true);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
@@ -31,14 +30,11 @@ export default function RootLayout() {
   useEffect(() => {
     if (!initialized) return;
 
-    // Route logic
     const inAuthGroup = segments[0] === 'auth';
 
     if (session && inAuthGroup) {
-      // Redirect to main app if signed in and in auth group
       router.replace('/(tabs)/inicio');
     } else if (!session && !inAuthGroup) {
-      // Redirect to login if not signed in and not in auth group
       router.replace('/auth/login');
     }
   }, [session, initialized, segments]);
@@ -61,9 +57,12 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="auth" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <GamificacionProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="auth" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="mision/[id]" />
+      </Stack>
+    </GamificacionProvider>
   );
 }

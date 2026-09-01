@@ -14,6 +14,9 @@ const TabIcon = ({ name, focused }: { name: string, focused: boolean }) => {
     case 'misiones':
       icon = '🎯';
       break;
+    case 'progreso':
+      icon = '📊';
+      break;
     case 'perfil':
       icon = '👤';
       break;
@@ -58,6 +61,10 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="misiones" 
         options={{ title: "Misiones", tabBarAccessibilityLabel: "Pestaña de Misiones y Gamificación" }}
+      />
+      <Tabs.Screen 
+        name="progreso" 
+        options={{ title: "Progreso", tabBarAccessibilityLabel: "Pestaña de Progreso y Estadísticas" }}
       />
       <Tabs.Screen 
         name="perfil" 
