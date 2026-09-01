@@ -1,14 +1,9 @@
 // src/data/misiones.ts
-// Datos locales de misiones y trivias (Módulo de Gamificación - Persona 3)
-// El contenido de las trivias vive aquí; el progreso del usuario (puntos,
-// misiones completadas) se guarda en el dispositivo y, opcionalmente, en
-// Supabase para alimentar el ranking.
-
 export interface Pregunta {
   id: string;
   enunciado: string;
   opciones: string[];
-  respuestaCorrecta: number; // índice de la opción correcta (0, 1, 2...)
+  respuestaCorrecta: number;
   explicacion: string;
 }
 
@@ -18,7 +13,7 @@ export interface Mision {
   bandera: string;
   titulo: string;
   descripcion: string;
-  puntos: number; // puntos que otorga completar la misión
+  puntos: number;
   preguntas: Pregunta[];
 }
 
@@ -127,7 +122,6 @@ export const misiones: Mision[] = [
   },
 ];
 
-// Definición de niveles según puntos acumulados
 export interface Nivel {
   nivel: number;
   nombre: string;
@@ -136,18 +130,17 @@ export interface Nivel {
 
 export const niveles: Nivel[] = [
   { nivel: 1, nombre: 'Aprendiz', puntosMinimos: 0 },
-  { nivel: 2, nombre: 'Explorador', puntosMinimos: 150 },
-  { nivel: 3, nombre: 'Aventurero', puntosMinimos: 300 },
-  { nivel: 4, nombre: 'Guardián', puntosMinimos: 450 },
+  { nivel: 2, nombre: 'Explorador', puntosMinimos: 300 },
+  { nivel: 3, nombre: 'Aventurero', puntosMinimos: 600 },
+  { nivel: 4, nombre: 'Guardián', puntosMinimos: 900 },
 ];
 
-// Insignias que se desbloquean según logros
 export interface Insignia {
   id: string;
   nombre: string;
   icono: string;
   descripcion: string;
-  requisitoMisiones: number; // misiones completadas necesarias
+  requisitoMisiones: number;
 }
 
 export const insignias: Insignia[] = [

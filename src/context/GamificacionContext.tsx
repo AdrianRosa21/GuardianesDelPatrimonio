@@ -1,3 +1,4 @@
+// src/context/GamificacionContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
@@ -5,10 +6,14 @@ import { misiones, niveles, insignias, Nivel, Insignia } from '../data/misiones'
 
 const STORAGE_KEY = '@guardianes_progreso';
 
-// Ponlo en true cuando William confirme el nombre de la tabla y columnas de puntos.
-const SINCRONIZAR_CON_SUPABASE = false;
-const TABLA_PUNTOS = 'usuarios';
-const COLUMNA_ID_USUARIO = 'id_usuario';
+// La tabla del ranking es 'perfiles' y su llave de usuario es la columna 'id'
+// (coincide con auth.uid). Cada usuario ya tiene su fila al registrarse, por eso
+// se ACTUALIZA (update) en lugar de crear. Los puntos se reemplazan por el total
+// exacto que lleva este módulo.
+const SINCRONIZAR_CON_SUPABASE = true;
+
+const TABLA_PUNTOS = 'perfiles';
+const COLUMNA_ID_USUARIO = 'id';
 const COLUMNA_PUNTOS = 'puntos';
 const COLUMNA_NIVEL = 'nivel';
 
@@ -32,8 +37,13 @@ interface GamificacionContextType {
 
 const GamificacionContext = createContext<GamificacionContextType | undefined>(undefined);
 
+// Calcula el nivel según la misma fórmula que usa la base de datos del ranking:
+// nivel = 1 + floor(puntos / 300), limitado al nivel máximo definido en 'niveles'.
+// Así el nivel que muestra la app siempre coincide con el del ranking.
 const calcularNivel = (puntos: number): Nivel => {
-  return [...niveles].reverse().find((n) => puntos >= n.puntosMinimos) || niveles[0];
+  const nivelMaximo = niveles[niveles.length - 1];
+  const numeroNivel = Math.min(1 + Math.floor(puntos / 300), nivelMaximo.nivel);
+  return niveles.find((n) => n.nivel === numeroNivel) || niveles[0];
 };
 
 export const GamificacionProvider = ({ children }: { children: React.ReactNode }) => {
@@ -68,19 +78,28 @@ export const GamificacionProvider = ({ children }: { children: React.ReactNode }
     }
   };
 
+  // Sincroniza puntos y nivel con Supabase (para el ranking).
+  // La fila del usuario ya existe en 'perfiles', así que se ACTUALIZA.
+  // Si algo falla, se registra en consola pero NO afecta la experiencia local.
   const sincronizarConSupabase = async (nuevosPuntos: number) => {
     if (!SINCRONIZAR_CON_SUPABASE) return;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
       const nivel = calcularNivel(nuevosPuntos).nivel;
+
       const { error } = await supabase
         .from(TABLA_PUNTOS)
-        .upsert(
-          { [COLUMNA_ID_USUARIO]: user.id, [COLUMNA_PUNTOS]: nuevosPuntos, [COLUMNA_NIVEL]: nivel },
-          { onConflict: COLUMNA_ID_USUARIO }
-        );
-      if (error) console.error('No se pudo sincronizar con el ranking:', error.message);
+        .update({
+          [COLUMNA_PUNTOS]: nuevosPuntos,
+          [COLUMNA_NIVEL]: nivel,
+        })
+        .eq(COLUMNA_ID_USUARIO, user.id);
+
+      if (error) {
+        console.error('No se pudo sincronizar con el ranking:', error.message);
+      }
     } catch (error) {
       console.error('Error de sincronización con Supabase:', error);
     }
