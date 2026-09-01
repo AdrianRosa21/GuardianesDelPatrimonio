@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Alert, TouchableOpacity } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '../../lib/supabase';
-import PrimaryButton from '../../components/common/PrimaryButton';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import PrimaryButton from '../../src/components/common/PrimaryButton';
+import { colors } from '../../src/theme/colors';
+import { spacing } from '../../src/theme/spacing';
 
-const ConfirmEmailScreen = ({ navigation, route }) => {
-  const { email } = route.params || {};
+const ConfirmEmailScreen = () => {
+  const router = useRouter();
+  const { email } = useLocalSearchParams<{ email: string }>();
   const [isResending, setIsResending] = useState(false);
 
   const handleResend = async () => {
@@ -27,7 +29,7 @@ const ConfirmEmailScreen = ({ navigation, route }) => {
       } else {
         Alert.alert('Éxito', 'Se ha reenviado el correo de confirmación.');
       }
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert('Error', error.message || 'Error al reenviar el correo');
     } finally {
       setIsResending(false);
@@ -58,7 +60,7 @@ const ConfirmEmailScreen = ({ navigation, route }) => {
 
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => router.replace('/auth/login')}
         >
           <Text style={styles.backButtonText}>Volver al inicio de sesión</Text>
         </TouchableOpacity>

@@ -1,19 +1,27 @@
-import React, { useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import { AuthContext } from '../../context/AuthContext';
-import PrimaryButton from '../../components/common/PrimaryButton';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import PrimaryButton from '../../src/components/common/PrimaryButton';
+import { colors } from '../../src/theme/colors';
+import { spacing } from '../../src/theme/spacing';
+import { supabase } from '../../lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 const ProfileScreen = () => {
-  const { user, logout } = useContext(AuthContext);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
 
   const handleLogout = async () => {
-    await logout();
+    await supabase.auth.signOut();
   };
 
-  // Obtener iniciales para el avatar
-  const getInitials = (name) => {
+  const name = user?.user_metadata?.nombre_completo;
+
+  const getInitials = (name?: string) => {
     if (!name) return 'U';
     const names = name.split(' ');
     if (names.length >= 2) {
@@ -27,9 +35,9 @@ const ProfileScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>{getInitials(user?.name)}</Text>
+            <Text style={styles.avatarText}>{getInitials(name)}</Text>
           </View>
-          <Text style={styles.nameText} accessibilityRole="header">{user?.name || 'Usuario'}</Text>
+          <Text style={styles.nameText} accessibilityRole="header">{name || 'Usuario'}</Text>
           <Text style={styles.emailText}>{user?.email || 'Sin correo'}</Text>
         </View>
 

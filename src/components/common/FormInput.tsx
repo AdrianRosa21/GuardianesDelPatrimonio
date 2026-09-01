@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, TextInputProps, StyleProp, ViewStyle } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+
+interface FormInputProps extends TextInputProps {
+  label?: string;
+  error?: string;
+  style?: StyleProp<ViewStyle>;
+}
 
 const FormInput = ({
   label,
@@ -10,9 +16,9 @@ const FormInput = ({
   style,
   accessibilityLabel,
   ...props
-}) => {
+}: FormInputProps) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
-  const isPassword = secureTextEntry !== undefined;
+  const isPassword = secureTextEntry !== undefined && secureTextEntry !== false;
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
@@ -35,7 +41,7 @@ const FormInput = ({
           placeholderTextColor={colors.placeholder}
           secureTextEntry={isPassword && !isPasswordVisible}
           accessibilityLabel={accessibilityLabel || label || 'Input field'}
-          accessibilityInvalid={!!error}
+          aria-invalid={!!error}
           {...props}
         />
         {isPassword && (

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,22 +8,21 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
+  Alert
 } from 'react-native';
-import { AuthContext } from '../../context/AuthContext';
-import FormInput from '../../components/common/FormInput';
-import PrimaryButton from '../../components/common/PrimaryButton';
-import { validateEmail, validatePassword } from '../../utils/validators';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import { useRouter } from 'expo-router';
+import FormInput from '../../src/components/common/FormInput';
+import PrimaryButton from '../../src/components/common/PrimaryButton';
+import { validateEmail, validatePassword } from '../../src/utils/validators';
+import { colors } from '../../src/theme/colors';
+import { spacing } from '../../src/theme/spacing';
 import { supabase } from '../../lib/supabase';
-import { Alert } from 'react-native';
 
-const LoginScreen = ({ navigation }) => {
-  // Ya no usamos login del contexto, sino Supabase directamente
-
+const LoginScreen = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({ email: null, password: null });
+  const [errors, setErrors] = useState<{ email?: string | null; password?: string | null; general?: string | null }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
@@ -50,17 +49,14 @@ const LoginScreen = ({ navigation }) => {
 
       if (error) {
         if (error.message === 'Email not confirmed') {
-          navigation.navigate('ConfirmEmail', { email: email.trim() });
+          router.push({ pathname: '/auth/confirmar_correo', params: { email: email.trim() } });
         } else {
           Alert.alert('Error de autenticación', error.message);
         }
       } else if (data.user) {
-        // La sesión ha sido iniciada. 
-        // AppNavigator escuchará onAuthStateChange y cambiará la pantalla automáticamente,
-        // o si prefieres forzar navegación:
-        // navigation.replace('Main');
+        // AppLayout (_layout.tsx) redirects automatically based on auth state change.
       }
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert('Error', error.message || 'Error al iniciar sesión');
     } finally {
       setIsSubmitting(false);
@@ -92,11 +88,11 @@ const LoginScreen = ({ navigation }) => {
               label="Correo electrónico"
               placeholder="tu@correo.com"
               value={email}
-              onChangeText={(text) => {
+              onChangeText={(text: string) => {
                 setEmail(text);
                 if (errors.email) setErrors({ ...errors, email: null });
               }}
-              error={errors.email}
+              error={errors.email || undefined}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -106,11 +102,11 @@ const LoginScreen = ({ navigation }) => {
               label="Contraseña"
               placeholder="Ingresa tu contraseña"
               value={password}
-              onChangeText={(text) => {
+              onChangeText={(text: string) => {
                 setPassword(text);
                 if (errors.password) setErrors({ ...errors, password: null });
               }}
-              error={errors.password}
+              error={errors.password || undefined}
               secureTextEntry={true}
             />
 
@@ -130,7 +126,7 @@ const LoginScreen = ({ navigation }) => {
             <View style={styles.footerContainer}>
               <Text style={styles.footerText}>¿No tienes una cuenta? </Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate('Register')}
+                onPress={() => router.push('/auth/registro')}
                 accessibilityRole="button"
                 accessibilityLabel="Ir a crear cuenta"
                 style={styles.touchableArea}

@@ -1,10 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
-import { colors } from '../theme/colors';
-import { spacing } from '../theme/spacing';
+import { useRouter } from 'expo-router';
+import { supabase } from '../../lib/supabase';
+import { colors } from '../../src/theme/colors';
+import { spacing } from '../../src/theme/spacing';
+import { User } from '@supabase/supabase-js';
 
-const ActionCard = ({ title, description, icon, onPress }) => (
+const ActionCard = ({ title, description, icon, onPress }: { title: string, description: string, icon: string, onPress: () => void }) => (
   <TouchableOpacity 
     style={styles.card} 
     onPress={onPress}
@@ -26,10 +28,17 @@ const ActionCard = ({ title, description, icon, onPress }) => (
   </TouchableOpacity>
 );
 
-const HomeScreen = ({ navigation }) => {
-  const { user } = useContext(AuthContext);
+const HomeScreen = () => {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
 
-  const getFirstName = (fullName) => {
+  const getFirstName = (fullName?: string) => {
     if (!fullName) return 'Guardián';
     return fullName.split(' ')[0];
   };
@@ -39,7 +48,7 @@ const HomeScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.greeting} accessibilityRole="header">
-            Hola, {getFirstName(user?.name)} 👋
+            Hola, {getFirstName(user?.user_metadata?.nombre_completo)} 👋
           </Text>
           <Text style={styles.subtitle}>
             ¿Qué descubriremos hoy?
@@ -51,21 +60,21 @@ const HomeScreen = ({ navigation }) => {
             title="Explorar culturas"
             description="Descubre países, tradiciones y lugares."
             icon="🏺"
-            onPress={() => navigation.navigate('Explorar')}
+            onPress={() => router.push('/(tabs)/explorar')}
           />
           
           <ActionCard
             title="Misiones"
             description="Pon a prueba lo que has aprendido."
             icon="🎯"
-            onPress={() => navigation.navigate('Misiones')}
+            onPress={() => router.push('/(tabs)/misiones')}
           />
           
           <ActionCard
             title="Mi perfil"
             description="Consulta tu cuenta y progreso."
             icon="👤"
-            onPress={() => navigation.navigate('Perfil')}
+            onPress={() => router.push('/(tabs)/perfil')}
           />
         </View>
       </ScrollView>

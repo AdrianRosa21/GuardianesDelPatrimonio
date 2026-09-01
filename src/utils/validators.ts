@@ -1,6 +1,6 @@
-// src/utils/validators.js
+// src/utils/validators.ts
 
-export const validateEmail = (email) => {
+export const validateEmail = (email: string) => {
   if (!email || email.trim() === '') {
     return 'El correo electrónico es obligatorio.';
   }
@@ -11,7 +11,7 @@ export const validateEmail = (email) => {
   return null;
 };
 
-export const validatePassword = (password) => {
+export const validatePassword = (password: string) => {
   if (!password) {
     return 'La contraseña es obligatoria.';
   }
@@ -30,7 +30,7 @@ export const validatePassword = (password) => {
   return null;
 };
 
-export const validateName = (name) => {
+export const validateName = (name: string) => {
   if (!name || name.trim() === '') {
     return 'El nombre es obligatorio.';
   }

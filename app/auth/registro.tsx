@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,30 +8,31 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
+  Alert
 } from 'react-native';
-import { AuthContext } from '../../context/AuthContext';
-import FormInput from '../../components/common/FormInput';
-import PrimaryButton from '../../components/common/PrimaryButton';
-import { validateName, validateEmail, validatePassword } from '../../utils/validators';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import { useRouter } from 'expo-router';
+import FormInput from '../../src/components/common/FormInput';
+import PrimaryButton from '../../src/components/common/PrimaryButton';
+import { validateName, validateEmail, validatePassword } from '../../src/utils/validators';
+import { colors } from '../../src/theme/colors';
+import { spacing } from '../../src/theme/spacing';
 import { supabase } from '../../lib/supabase';
-import { Alert } from 'react-native';
 
-const RegisterScreen = ({ navigation }) => {
-  // Ya no usamos register del contexto, sino Supabase directamente
+const RegisterScreen = () => {
+  const router = useRouter();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  const [errors, setErrors] = useState({ 
-    name: null, 
-    email: null, 
-    password: null, 
-    confirmPassword: null 
-  });
+  const [errors, setErrors] = useState<{ 
+    name?: string | null; 
+    email?: string | null; 
+    password?: string | null; 
+    confirmPassword?: string | null;
+    general?: string | null;
+  }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRegister = async () => {
@@ -79,9 +80,9 @@ const RegisterScreen = ({ navigation }) => {
         Alert.alert('Error de registro', error.message);
       } else {
         // Registro exitoso, redirigimos a confirmar correo
-        navigation.navigate('ConfirmEmail', { email: email.trim() });
+        router.push({ pathname: '/auth/confirmar_correo', params: { email: email.trim() } });
       }
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert('Error', error.message || 'Error al registrar usuario');
     } finally {
       setIsSubmitting(false);
@@ -113,11 +114,11 @@ const RegisterScreen = ({ navigation }) => {
               label="Nombre completo"
               placeholder="Ej. María López"
               value={name}
-              onChangeText={(text) => {
+              onChangeText={(text: string) => {
                 setName(text);
                 if (errors.name) setErrors({ ...errors, name: null });
               }}
-              error={errors.name}
+              error={errors.name || undefined}
               autoCapitalize="words"
             />
 
@@ -125,11 +126,11 @@ const RegisterScreen = ({ navigation }) => {
               label="Correo electrónico"
               placeholder="tu@correo.com"
               value={email}
-              onChangeText={(text) => {
+              onChangeText={(text: string) => {
                 setEmail(text);
                 if (errors.email) setErrors({ ...errors, email: null });
               }}
-              error={errors.email}
+              error={errors.email || undefined}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -139,11 +140,11 @@ const RegisterScreen = ({ navigation }) => {
               label="Contraseña"
               placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 número"
               value={password}
-              onChangeText={(text) => {
+              onChangeText={(text: string) => {
                 setPassword(text);
                 if (errors.password) setErrors({ ...errors, password: null });
               }}
-              error={errors.password}
+              error={errors.password || undefined}
               secureTextEntry={true}
             />
 
@@ -151,11 +152,11 @@ const RegisterScreen = ({ navigation }) => {
               label="Confirmar contraseña"
               placeholder="Repite tu contraseña"
               value={confirmPassword}
-              onChangeText={(text) => {
+              onChangeText={(text: string) => {
                 setConfirmPassword(text);
                 if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: null });
               }}
-              error={errors.confirmPassword}
+              error={errors.confirmPassword || undefined}
               secureTextEntry={true}
             />
 
@@ -175,7 +176,7 @@ const RegisterScreen = ({ navigation }) => {
             <View style={styles.footerContainer}>
               <Text style={styles.footerText}>¿Ya tienes una cuenta? </Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate('Login')}
+                onPress={() => router.push('/auth/login')}
                 accessibilityRole="button"
                 accessibilityLabel="Ir a iniciar sesión"
                 style={styles.touchableArea}

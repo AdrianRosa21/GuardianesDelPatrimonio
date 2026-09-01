@@ -1,9 +1,18 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 
-const PrimaryButton = ({ title, onPress, disabled, style, accessibilityLabel, accessibilityHint }) => {
+interface PrimaryButtonProps {
+  title: string;
+  onPress: () => void;
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+}
+
+const PrimaryButton = ({ title, onPress, disabled, style, accessibilityLabel, accessibilityHint }: PrimaryButtonProps) => {
   return (
     <TouchableOpacity
       style={[styles.button, disabled && styles.disabled, style]}

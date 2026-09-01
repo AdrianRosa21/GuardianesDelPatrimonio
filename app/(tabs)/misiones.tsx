@@ -1,23 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import { colors } from '../../src/theme/colors';
+import { spacing } from '../../src/theme/spacing';
 
-const CultureHomeScreen = () => {
+const MissionsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <Text style={styles.icon}>🏺</Text>
+          <Text style={styles.icon}>🎯</Text>
         </View>
         <Text style={styles.title} accessibilityRole="header">
-          Exploración cultural
+          Misiones
         </Text>
         <Text style={styles.description}>
-          Este módulo permitirá explorar países, categorías y patrimonio cultural.
+          Este módulo contendrá trivias, desafíos y progreso.
         </Text>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>Módulo de Persona 2</Text>
+          <Text style={styles.badgeText}>Módulo de Persona 3</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -79,4 +79,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CultureHomeScreen;
+export default MissionsScreen;
