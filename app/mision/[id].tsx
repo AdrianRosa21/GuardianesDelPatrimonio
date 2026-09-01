@@ -31,15 +31,14 @@ const TriviaScreen = () => {
       try {
         setCargandoDato(true);
         const respuesta = await fetch(
-          `https://restcountries.com/v3.1/name/${encodeURIComponent(mision.pais)}?fields=capital,region,population`
+          `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(mision.pais)}`
         );
         const datos = await respuesta.json();
-        if (Array.isArray(datos) && datos.length > 0) {
-          const pais = datos[0];
-          const capital = pais.capital?.[0] || 'desconocida';
-          const region = pais.region || 'América';
-          const poblacion = pais.population ? pais.population.toLocaleString('es') : 'muchos';
-          setDatoCultural(`Capital: ${capital} · Región: ${region} · Población: ${poblacion} habitantes.`);
+        
+        if (datos.extract) {
+          // Tomar solo la primera o las dos primeras oraciones para que no sea muy largo
+          const resumenCorto = datos.extract.split('. ').slice(0, 2).join('. ') + '.';
+          setDatoCultural(resumenCorto);
         } else {
           setDatoCultural('No se pudo obtener información adicional del país.');
         }
